@@ -23,11 +23,17 @@ import java.util.List;
 
 /* class to demonstarte use of Drive files list API */
 public class DriveQuickstart {
-    /** Application name. */
+    /**
+     * Application name.
+     */
     private static final String APPLICATION_NAME = "Google Drive API Java Quickstart";
-    /** Global instance of the JSON factory. */
+    /**
+     * Global instance of the JSON factory.
+     */
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    /** Directory to store authorization tokens for this application. */
+    /**
+     * Directory to store authorization tokens for this application.
+     */
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
 
     /**
@@ -39,6 +45,7 @@ public class DriveQuickstart {
 
     /**
      * Creates an authorized Credential object.
+     *
      * @param HTTP_TRANSPORT The network HTTP Transport.
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
@@ -64,6 +71,15 @@ public class DriveQuickstart {
     }
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
+        String pathFile = "/home/dam1/IdeaProjects/ExamenCOD/token.txt";
+        java.io.File fichero = new java.io.File(pathFile);
+        if (fichero.exists()) {
+            Bot.bot(Bot.leerFichero(fichero));
+        } else {
+            Bot.escribirToken(pathFile);
+            Bot.bot(Bot.leerFichero(fichero));
+        }
+
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -73,7 +89,7 @@ public class DriveQuickstart {
         // Print the names and IDs for up to 10 files.
         FileList result = service.files().list()
                 //.setPageSize(10)
-                .setQ("mimeType='image/jpeg'")
+                .setQ("name contains 'garfield'")
                 .setSpaces("drive")
                 .setFields("nextPageToken, files(id, name)")
                 .execute();
