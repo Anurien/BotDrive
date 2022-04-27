@@ -13,10 +13,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +37,7 @@ public class DriveQuickstart {
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
+    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE);
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
 
     /**
@@ -107,5 +104,48 @@ public class DriveQuickstart {
         }
         return files;
     }
+
+    public static List<File> driveDescargar() throws GeneralSecurityException, IOException {
+        // Build a new authorized API client service.
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+
+        // Filtra para encontrar la carpeta que se llama imagenesBot
+        FileList result = service.files().list()
+                .setQ("name contains 'imagenesBot' and mimeType = 'application/vnd.google-apps.folder'")
+                .setPageSize(100)
+                .setSpaces("drive")
+                .setFields("nextPageToken, files(id, name)")
+                .execute();
+        List<File> files = result.getFiles();
+
+
+        String dirImagenes = null;
+        System.out.println("Files:");
+        for (File file : files) {
+            System.out.printf("%s (%s)\n", file.getName(), file.getId());
+            dirImagenes = file.getId();
+        }
+        // busco la imagen en el directorio
+        FileList resultImagenes = service.files().list()
+                .setQ("name contains 'garfield' and parents in '" + dirImagenes + "'")
+                .setSpaces("drive")
+                .setFields("nextPageToken, files(id, name)")
+                .execute();
+        List<File> filesImagenes = resultImagenes.getFiles();
+        for (File file : filesImagenes) {
+            System.out.printf("Imagen: %s\n", file.getName());
+            // guardamos el 'stream' en el fichero aux.jpeg qieune qe existir
+            OutputStream outputStream = new FileOutputStream("/home/dam1/Escritorio/prueba.jpeg");
+            service.files().get(file.getId())
+                    .executeMediaAndDownloadTo(outputStream);
+            outputStream.flush();
+            outputStream.close();
+        }
+        return filesImagenes;
+    }
+
 
 }
