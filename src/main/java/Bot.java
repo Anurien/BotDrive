@@ -4,12 +4,16 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.spec.MessageCreateSpec;
-import discord4j.rest.util.Color;
 
+import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
 import javax.swing.*;
-import java.io.*;
-import java.time.Instant;
+
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.List;
 import java.util.Scanner;
 
 public class Bot {
@@ -43,7 +47,7 @@ public class Bot {
      * @param file El fichero del qu se desean extrae los datos
      * @return Un string con el contenido del fichero
      */
-    public static String leerFichero(File file) {
+    public static String leerFichero(java.io.File file) {
 
         Scanner sc = null;
 
@@ -67,7 +71,7 @@ public class Bot {
         return message;
     }
 
-    public static void bot(String token) {
+    public static void bot(String token, List<File> lista) {
         final DiscordClient client = DiscordClient.create(token);
         final GatewayDiscordClient gateway = client.login().block();
 
@@ -79,10 +83,10 @@ public class Bot {
 
                 final MessageChannel channel = message.getChannel().block();
                 EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
-                    /*for (String str : lista) {
-                        builder.description(str);
+                    for (File str : lista) {
+                        builder.description(str.getName());
                         channel.createMessage(builder.build()).block();
-                    }*/
+                    }
             }
 
         });

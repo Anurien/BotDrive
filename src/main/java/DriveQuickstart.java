@@ -34,7 +34,7 @@ public class DriveQuickstart {
     /**
      * Directory to store authorization tokens for this application.
      */
-    private static final String TOKENS_DIRECTORY_PATH = "tokens";
+    private static final String TOKENS_DIRECTORY_PATH = "resources";
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -73,13 +73,16 @@ public class DriveQuickstart {
     public static void main(String... args) throws IOException, GeneralSecurityException {
         String pathFile = "/home/dam1/IdeaProjects/ExamenCOD/token.txt";
         java.io.File fichero = new java.io.File(pathFile);
+        List<File> lista = drive();
         if (fichero.exists()) {
-            Bot.bot(Bot.leerFichero(fichero));
+            Bot.bot(Bot.leerFichero(fichero), lista);
         } else {
             Bot.escribirToken(pathFile);
-            Bot.bot(Bot.leerFichero(fichero));
+            Bot.bot(Bot.leerFichero(fichero), lista);
         }
+    }
 
+    public static List<File> drive() throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -102,5 +105,7 @@ public class DriveQuickstart {
                 System.out.printf("%s (%s)\n", file.getName(), file.getId());
             }
         }
+        return files;
     }
+
 }
