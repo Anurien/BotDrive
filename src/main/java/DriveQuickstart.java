@@ -4,6 +4,7 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -62,7 +63,7 @@ public class DriveQuickstart {
                 .setAccessType("offline")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("168076958069-8ni267jsukk2b3sroot3nqhqhpu91qal.apps.googleusercontent.com");
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("168076958069-0rm2p97mh0k94n4o6iriuu4s7ris0m98.apps.googleusercontent.com");
         //returns an authorized Credential object.
         return credential;
     }
@@ -72,8 +73,10 @@ public class DriveQuickstart {
         java.io.File fichero = new java.io.File(pathFile);
         List<File> lista = drive();
         if (fichero.exists()) {
+            driveDescargar();
             Bot.bot(Bot.leerFichero(fichero), lista);
         } else {
+            driveDescargar();
             Bot.escribirToken(pathFile);
             Bot.bot(Bot.leerFichero(fichero), lista);
         }
@@ -105,7 +108,7 @@ public class DriveQuickstart {
         return files;
     }
 
-    public static List<File> driveDescargar() throws GeneralSecurityException, IOException {
+    public static void driveDescargar() throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -114,38 +117,38 @@ public class DriveQuickstart {
 
         // Filtra para encontrar la carpeta que se llama imagenesBot
         FileList result = service.files().list()
-                .setQ("name contains 'imagenesBot' and mimeType = 'application/vnd.google-apps.folder'")
+                .setQ("name contains 'garfield'")
                 .setPageSize(100)
                 .setSpaces("drive")
                 .setFields("nextPageToken, files(id, name)")
                 .execute();
         List<File> files = result.getFiles();
 
-
-        String dirImagenes = null;
-        System.out.println("Files:");
-        for (File file : files) {
-            System.out.printf("%s (%s)\n", file.getName(), file.getId());
-            dirImagenes = file.getId();
+        if (files == null || files.isEmpty()) {
+            System.out.println("No files found.");
+        } else {
+            String dirImagenes = null;
+            System.out.println("Files:");
+            for (File file : files) {
+                System.out.printf("%s (%s)\n", file.getName(), file.getId());
+                dirImagenes = file.getId();
+            }
+            // busco la imagen en el directorio
+            FileList resultImagenes = service.files().list()
+                    .setQ("name contains 'garfield' ")
+                    .setSpaces("drive")
+                    .setFields("nextPageToken, files(id, name)")
+                    .execute();
+            List<File> filesImagenes = resultImagenes.getFiles();
+            for (File file : filesImagenes) {
+                System.out.printf("Imagen: %s\n", file.getName());
+                // guardamos el 'stream' en el fichero aux.jpeg qieune qe existir
+                OutputStream outputStream = new FileOutputStream("/home/dam1/Escritorio/prueb.jpg");
+                service.files().get(file.getId())
+                        .executeMediaAndDownloadTo(outputStream);
+                outputStream.flush();
+                outputStream.close();
+            }
         }
-        // busco la imagen en el directorio
-        FileList resultImagenes = service.files().list()
-                .setQ("name contains 'garfield' and parents in '" + dirImagenes + "'")
-                .setSpaces("drive")
-                .setFields("nextPageToken, files(id, name)")
-                .execute();
-        List<File> filesImagenes = resultImagenes.getFiles();
-        for (File file : filesImagenes) {
-            System.out.printf("Imagen: %s\n", file.getName());
-            // guardamos el 'stream' en el fichero aux.jpeg qieune qe existir
-            OutputStream outputStream = new FileOutputStream("/home/dam1/Escritorio/prueba.jpeg");
-            service.files().get(file.getId())
-                    .executeMediaAndDownloadTo(outputStream);
-            outputStream.flush();
-            outputStream.close();
-        }
-        return filesImagenes;
     }
-
-
 }

@@ -6,13 +6,12 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.rest.util.Color;
+
 import javax.swing.*;
 
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.Scanner;
 
@@ -78,6 +77,8 @@ public class Bot {
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             final Message message = event.getMessage();
             EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                    .color(Color.GREEN)
+                    .image("attachment://amongos.jpg")
                     .build();
             if ("garfield".equals(message.getContent())) {
 
@@ -87,8 +88,21 @@ public class Bot {
                         builder.description(str.getName());
                         channel.createMessage(builder.build()).block();
                     }
-            }
+            }else if("!garfield".equals(message.getContent())) {
+                final MessageChannel channel = message.getChannel().block();
 
+                InputStream fileAsInputStream = null;
+                try {
+                    fileAsInputStream = new FileInputStream("/home/dam1/Escritorio/prueb.jpg");
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                channel.createMessage(MessageCreateSpec.builder()
+                        .content("content? content")
+                        .addFile("prueb.jpg", fileAsInputStream)
+                        .addEmbed(embed)
+                        .build()).subscribe();
+            }
         });
 
         gateway.onDisconnect().block();
