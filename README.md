@@ -11,10 +11,12 @@ Bot hecho en java para Discord.
 
 
 ## Funciones 
--Lista y envia fotos desde el directorio local donde se ejecuta el bot.
--Lista y envia fotos desde una carpeta de Drive.
--Envia fotos desde una URL.
+- Lista y envia fotos desde el directorio local donde se ejecuta el bot.
+- Lista y envia fotos desde una carpeta de Drive.
+- Envia fotos desde una URL.
 
 ## Modo de empleo
-El bot reacciona a cualquier comando que empiece por !
+- Crear una cuenta en [Discord Developer Portal](https://discord.com/developers/applications)
+- Al iniciar el bot te pedirá por pantalla el token para iniciarlo. (Solo tendrás que ponerlo una vez!)
+- El bot reacciona a cualquier comando que empiece por !
 (lista de comandos aun en development)
