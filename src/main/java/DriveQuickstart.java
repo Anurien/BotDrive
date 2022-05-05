@@ -70,15 +70,15 @@ public class DriveQuickstart {
 
     public static void main(String... args) throws IOException, GeneralSecurityException {
         String pathFile = "/home/dam1/IdeaProjects/ExamenCOD/token.txt";
+        String parametro = "garfield";
         java.io.File fichero = new java.io.File(pathFile);
-        List<File> lista = drive();
+        List<File> lista = drive(parametro);
+
         if (fichero.exists()) {
-            driveDescargar();
-            Bot.bot(Bot.leerFichero(fichero), lista);
+            Bot.bot(Bot.leerFichero(fichero), lista,parametro);
         } else {
-            driveDescargar();
             Bot.escribirToken(pathFile);
-            Bot.bot(Bot.leerFichero(fichero), lista);
+            Bot.bot(Bot.leerFichero(fichero), lista,parametro);
         }
     }
 
@@ -86,10 +86,11 @@ public class DriveQuickstart {
      * @return Devuelve una lista de archivos buscados en drive
      * @throws GeneralSecurityException
      * @throws IOException
+     * @param parametro Palabra a buscar
      * Este metodo busca las coincidencias de palabras en drive y muestra en consola
      * una lista con todos los archivos coincidentes
      */
-    public static List<File> drive() throws GeneralSecurityException, IOException {
+    public static List<File> drive(String parametro) throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -99,7 +100,7 @@ public class DriveQuickstart {
         // Print the names and IDs for up to 10 files.
         FileList result = service.files().list()
                 //.setPageSize(10)
-                .setQ("name contains 'garfield'")
+                .setQ("name contains '"+parametro+"'")
                 .setSpaces("drive")
                 .setFields("nextPageToken, files(id, name)")
                 .execute();
@@ -107,7 +108,7 @@ public class DriveQuickstart {
         if (files == null || files.isEmpty()) {
             System.out.println("No files found.");
         } else {
-            System.out.println("Files:");
+            System.out.println("Archivos:");
             for (File file : files) {
                 System.out.printf("%s (%s)\n", file.getName(), file.getId());
             }
@@ -117,11 +118,12 @@ public class DriveQuickstart {
 
     /**
      * @throws GeneralSecurityException
-     * @throws IOException
-     * Este método busca entre carpetas y archivos una imagen deseada y la descarga
+     * @throws IOException por si no se encuentran las credenciales
+     * @param parametro palabra a buscar
+     * Este método recibe un string y busca entre carpetas y archivos una imagen deseada y la descarga
      * en un archivo auxiliar
      */
-    public static void driveDescargar() throws GeneralSecurityException, IOException {
+    public static void driveDescargar(String parametro) throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
@@ -148,7 +150,7 @@ public class DriveQuickstart {
             }
             // busco la imagen en el directorio
             FileList resultImagenes = service.files().list()
-                    .setQ("name contains 'garfield' and parents in '"+ dirImagenes +"'")
+                    .setQ("name contains '"+parametro+"' and parents in '"+ dirImagenes +"'")
                     .setSpaces("drive")
                     .setFields("nextPageToken, files(id, name)")
                     .execute();
@@ -156,7 +158,7 @@ public class DriveQuickstart {
             for (File file : filesImagenes) {
                 System.out.printf("Imagen: %s\n", file.getName());
                 // guardamos el 'stream' en el fichero prueb.jpg tiene que existir
-                OutputStream outputStream = new FileOutputStream("/home/dam1/Escritorio/prueb.jpg");
+                OutputStream outputStream = new FileOutputStream("/home/dam1/IdeaProjects/BotDrive/src/main/resources/"+parametro+".jpg");
                 service.files().get(file.getId())
                         .executeMediaAndDownloadTo(outputStream);
                 outputStream.flush();
