@@ -70,6 +70,12 @@ public class Bot {
         return message;
     }
 
+    /**
+     * @param token para el funcionamiento del bot
+     * @param lista lista de archivos recogidos de drive
+     * Este método crea un embed que saca por discord una lista de imagenes
+     * o muestra una imagen dependiendo del comando utilizado
+     */
     public static void bot(String token, List<File> lista) {
         final DiscordClient client = DiscordClient.create(token);
         final GatewayDiscordClient gateway = client.login().block();
@@ -84,6 +90,7 @@ public class Bot {
 
                 final MessageChannel channel = message.getChannel().block();
                 EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
+                //Array de archivos recibido de drive
                     for (File str : lista) {
                         builder.description(str.getName());
                         channel.createMessage(builder.build()).block();

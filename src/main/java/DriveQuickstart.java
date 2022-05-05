@@ -82,6 +82,13 @@ public class DriveQuickstart {
         }
     }
 
+    /**
+     * @return Devuelve una lista de archivos buscados en drive
+     * @throws GeneralSecurityException
+     * @throws IOException
+     * Este metodo busca las coincidencias de palabras en drive y muestra en consola
+     * una lista con todos los archivos coincidentes
+     */
     public static List<File> drive() throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -108,6 +115,12 @@ public class DriveQuickstart {
         return files;
     }
 
+    /**
+     * @throws GeneralSecurityException
+     * @throws IOException
+     * Este método busca entre carpetas y archivos una imagen deseada y la descarga
+     * en un archivo auxiliar
+     */
     public static void driveDescargar() throws GeneralSecurityException, IOException {
         // Build a new authorized API client service.
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -117,7 +130,7 @@ public class DriveQuickstart {
 
         // Filtra para encontrar la carpeta que se llama imagenesBot
         FileList result = service.files().list()
-                .setQ("name contains 'garfield'")
+                .setQ("name contains 'fotos' and mimeType = 'application/vnd.google-apps.folder'")
                 .setPageSize(100)
                 .setSpaces("drive")
                 .setFields("nextPageToken, files(id, name)")
@@ -135,14 +148,14 @@ public class DriveQuickstart {
             }
             // busco la imagen en el directorio
             FileList resultImagenes = service.files().list()
-                    .setQ("name contains 'garfield' ")
+                    .setQ("name contains 'garfield' and parents in '"+ dirImagenes +"'")
                     .setSpaces("drive")
                     .setFields("nextPageToken, files(id, name)")
                     .execute();
             List<File> filesImagenes = resultImagenes.getFiles();
             for (File file : filesImagenes) {
                 System.out.printf("Imagen: %s\n", file.getName());
-                // guardamos el 'stream' en el fichero aux.jpeg qieune qe existir
+                // guardamos el 'stream' en el fichero prueb.jpg tiene que existir
                 OutputStream outputStream = new FileOutputStream("/home/dam1/Escritorio/prueb.jpg");
                 service.files().get(file.getId())
                         .executeMediaAndDownloadTo(outputStream);
