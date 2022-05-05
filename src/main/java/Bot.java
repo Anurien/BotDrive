@@ -12,6 +12,7 @@ import discord4j.rest.util.Color;
 import javax.swing.*;
 
 import java.io.*;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -70,9 +71,24 @@ public class Bot {
         return message;
     }
 
-    public static void bot(String token, List<File> lista) {
+    /**
+     * @param token para el funcionamiento del bot
+     * @param lista lista de archivos recogidos de drive
+     * @param parametro palabra para buscar
+     * Este método crea un embed que saca por discord una lista de imagenes
+     * o muestra una imagen dependiendo del comando utilizado
+     */
+    public static void bot(String token, List<File> lista, String parametro) {
+
         final DiscordClient client = DiscordClient.create(token);
         final GatewayDiscordClient gateway = client.login().block();
+        try {
+            DriveQuickstart.driveDescargar(parametro);
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         gateway.on(MessageCreateEvent.class).subscribe(event -> {
             final Message message = event.getMessage();
@@ -80,26 +96,27 @@ public class Bot {
                     .color(Color.GREEN)
                     .image("attachment://amongos.jpg")
                     .build();
-            if ("garfield".equals(message.getContent())) {
+            if ((parametro).equals(message.getContent())) {
 
                 final MessageChannel channel = message.getChannel().block();
                 EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
+                //Array de archivos recibido de drive
                     for (File str : lista) {
                         builder.description(str.getName());
                         channel.createMessage(builder.build()).block();
                     }
-            }else if("!garfield".equals(message.getContent())) {
+            }else if(("!"+parametro).equals(message.getContent())) {
                 final MessageChannel channel = message.getChannel().block();
 
                 InputStream fileAsInputStream = null;
                 try {
-                    fileAsInputStream = new FileInputStream("/home/dam1/Escritorio/prueb.jpg");
+                    fileAsInputStream = new FileInputStream("/home/dam1/IdeaProjects/BotDrive/src/main/resources/"+parametro+".jpg");
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
                 channel.createMessage(MessageCreateSpec.builder()
                         .content("content? content")
-                        .addFile("prueb.jpg", fileAsInputStream)
+                        .addFile(parametro+".jpg", fileAsInputStream)
                         .addEmbed(embed)
                         .build()).subscribe();
             }
