@@ -71,13 +71,7 @@ public class Bot {
         return message;
     }
 
-    /**
-     * @param token para el funcionamiento del bot
-     * @param lista lista de archivos recogidos de drive
-     * @param parametro palabra para buscar
-     * Este método crea un embed que saca por discord una lista de imagenes
-     * o muestra una imagen dependiendo del comando utilizado
-     */
+
     public static void bot(String token, List<File> lista, String parametro) {
 
         final DiscordClient client = DiscordClient.create(token);
@@ -101,22 +95,31 @@ public class Bot {
                 final MessageChannel channel = message.getChannel().block();
                 EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
                 //Array de archivos recibido de drive
+               
+
                     for (File str : lista) {
                         builder.description(str.getName());
                         channel.createMessage(builder.build()).block();
                     }
             }else if(("!"+parametro).equals(message.getContent())) {
+
                 final MessageChannel channel = message.getChannel().block();
 
                 InputStream fileAsInputStream = null;
                 try {
+
+
                     fileAsInputStream = new FileInputStream("/home/dam1/IdeaProjects/BotDrive/src/main/resources/"+parametro+".jpg");
+
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
                 channel.createMessage(MessageCreateSpec.builder()
                         .content("content? content")
+
+
                         .addFile(parametro+".jpg", fileAsInputStream)
+
                         .addEmbed(embed)
                         .build()).subscribe();
             }
@@ -125,5 +128,32 @@ public class Bot {
         gateway.onDisconnect().block();
     }
 
+    public static void botExamen(String token, String parametro) {
+        final DiscordClient client = DiscordClient.create(token);
+        final GatewayDiscordClient gateway = client.login().block();
+        try {
+            DriveQuickstart.downloadFile(parametro);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (GeneralSecurityException e) {
+            e.printStackTrace();
+        }
+
+        gateway.on(MessageCreateEvent.class).subscribe(event -> {
+            final Message message = event.getMessage();
+            EmbedCreateSpec embed = EmbedCreateSpec.builder()
+                    .color(Color.GREEN)
+                    .image("attachment://amongos.jpg")
+                    .build();
+            if (("/pdf").equals(message.getContent())) {
+
+                final MessageChannel channel = message.getChannel().block();
+                EmbedCreateSpec.Builder builder = EmbedCreateSpec.builder();
+                builder.description("Archivo descargado");
+            }
+        });
+        gateway.onDisconnect().block();
+
+    }
 }
 
