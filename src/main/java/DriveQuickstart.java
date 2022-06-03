@@ -5,6 +5,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -164,6 +165,26 @@ public class DriveQuickstart {
                 outputStream.flush();
                 outputStream.close();
             }
+        }
+    }
+
+    public static ByteArrayOutputStream downloadFile(String realFileId) throws IOException, GeneralSecurityException {
+        final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+        Drive service = new Drive.Builder(HTTP_TRANSPORT, JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
+
+        try {
+            OutputStream outputStream = new ByteArrayOutputStream();
+
+            service.files().get(realFileId)
+                    .executeMediaAndDownloadTo(outputStream);
+
+            return (ByteArrayOutputStream) outputStream;
+        }catch (GoogleJsonResponseException e) {
+            // TODO(developer) - handle error appropriately
+            System.err.println("Unable to move file: " + e.getDetails());
+            throw e;
         }
     }
 }
