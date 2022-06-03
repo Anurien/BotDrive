@@ -182,7 +182,6 @@ public class DriveQuickstart {
 
             return (ByteArrayOutputStream) outputStream;
         }catch (GoogleJsonResponseException e) {
-            // TODO(developer) - handle error appropriately
             System.err.println("Unable to move file: " + e.getDetails());
             throw e;
         }
